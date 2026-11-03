@@ -1679,6 +1679,15 @@ export const allExercisesList: Record<IExerciseId, IExercise> = {
     startingWeightLb: { value: 105, unit: "lb" },
     startingWeightKg: { value: 47.5, unit: "kg" },
   },
+  wallSlide: {
+    id: "wallSlide",
+    name: "Wall Slide",
+    defaultWarmup: 10,
+    defaultEquipment: "bodyweight",
+    types: ["upper"],
+    startingWeightLb: { value: 0, unit: "lb" },
+    startingWeightKg: { value: 0, unit: "kg" },
+  },
   wallPushup: {
     id: "wallPushup",
     name: "Wall Push Up",
@@ -3786,6 +3795,12 @@ export const metadata: Record<IExerciseId, IMetaExercises> = {
     synergistMuscles: ["Adductor Magnus", "Gluteus Maximus", "Soleus"],
     bodyParts: ["Hips"],
     sortedEquipment: ["barbell"],
+  },
+  wallSlide: {
+    targetMuscles: ["Serratus Anterior", "Trapezius Lower Fibers"],
+    synergistMuscles: ["Deltoid Anterior", "Trapezius Middle Fibers"],
+    bodyParts: ["Shoulders"],
+    sortedEquipment: ["bodyweight"],
   },
   wallPushup: {
     targetMuscles: ["Pectoralis Major Sternal Head"],

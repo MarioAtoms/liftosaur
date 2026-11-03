@@ -11,13 +11,14 @@ function typedSetup(key: string, legacy: IEquipmentData, unit: IUnit): IEquipmen
       return {
         type: "fixed",
         unit,
-        ranges:
-          unit === "lb"
-            ? [{ from: 5, to: 100, step: 5 }]
-            : [
-                { from: 2, to: 10, step: 2 },
-                { from: 12.5, to: 50, step: 2.5 },
-              ],
+        ranges: unit === "lb" ? [{ from: 10, to: 75, step: 5 }] : [{ from: 5, to: 35, step: 2.5 }],
+        values: [],
+      };
+    case "kettlebell":
+      return {
+        type: "fixed",
+        unit,
+        ranges: unit === "lb" ? [{ from: 25, to: 100, step: 2.5 }] : [{ from: 12, to: 48, step: 2 }],
         values: [],
       };
     case "cable":

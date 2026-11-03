@@ -1,8 +1,8 @@
 import { CollectionUtils_sort } from "../utils/collection";
 import { Dialog_alert } from "../utils/dialog";
 import { UidFactory_generateUid } from "../utils/generator";
-import { ObjectUtils_clone, ObjectUtils_keys, ObjectUtils_values } from "../utils/object";
-import { IGraph, IHistoryRecord, IMuscle, ISettings, IStorage } from "../types";
+import { ObjectUtils_clone, ObjectUtils_isEqual, ObjectUtils_keys, ObjectUtils_values } from "../utils/object";
+import { IEquipmentSetup, IGraph, IHistoryRecord, IMuscle, ISettings, IStorage, IUnit } from "../types";
 import { Weight_build } from "../models/weight";
 import { PlannerExerciseEvaluator } from "../pages/planner/plannerExerciseEvaluator";
 import { basicBeginnerProgram } from "../programs/basicBeginnerProgram";
@@ -10,6 +10,8 @@ import { IVersions } from "../models/versionTracker";
 import { Settings_build } from "../models/settings";
 import { Progress_getEntryId } from "../models/progress";
 import { EquipmentUnits_attachSetups } from "../models/equipmentUnits";
+import { EquipmentDefaults_build } from "../models/equipmentDefaults";
+import { EquipmentSetup_save } from "../models/equipmentSetup";
 import { MuscleGroupSplit_migrate } from "../models/muscleGroupSplit";
 
 let latestMigrationVersion: number | undefined;
@@ -482,5 +484,43 @@ export const migrations = {
   },
   "20261022120000_split_muscle_groups": (aStorage: IStorage): IStorage => {
     return MuscleGroupSplit_migrate(aStorage);
+  },
+  "20261103120000_ironmaster_equipment": (aStorage: IStorage): IStorage => {
+    const storage: IStorage = JSON.parse(JSON.stringify(aStorage));
+    const oldDumbbell: Record<IUnit, IEquipmentSetup> = {
+      lb: { type: "fixed", unit: "lb", ranges: [{ from: 5, to: 100, step: 5 }], values: [] },
+      kg: {
+        type: "fixed",
+        unit: "kg",
+        ranges: [
+          { from: 2, to: 10, step: 2 },
+          { from: 12.5, to: 50, step: 2.5 },
+        ],
+        values: [],
+      },
+    };
+    const oldKettlebell: Record<IUnit, IEquipmentSetup> = {
+      lb: { type: "fixed", unit: "lb", ranges: [], values: [10, 15, 20, 25, 30, 35, 40] },
+      kg: { type: "fixed", unit: "kg", ranges: [], values: [4, 8, 12, 16, 24] },
+    };
+    for (const gym of storage.settings.gyms || []) {
+      for (const key of ["dumbbell", "kettlebell"] as const) {
+        const entry = gym.equipment?.[key];
+        const setup = entry?.setup;
+        if (entry == null || setup == null) {
+          continue;
+        }
+        const unit: IUnit = setup.unit === "kg" ? "kg" : "lb";
+        const previous = key === "dumbbell" ? oldDumbbell[unit] : oldKettlebell[unit];
+        if (!ObjectUtils_isEqual(setup, previous)) {
+          continue;
+        }
+        const next = EquipmentDefaults_build(unit)[key]?.setup;
+        if (next != null) {
+          gym.equipment[key] = EquipmentSetup_save(entry, next);
+        }
+      }
+    }
+    return storage;
   },
 };

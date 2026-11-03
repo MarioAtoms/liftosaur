@@ -14,7 +14,7 @@ describe("EquipmentDefaults", () => {
     expect(equipment.dumbbell?.setup).to.eql({
       type: "fixed",
       unit: "lb",
-      ranges: [{ from: 5, to: 100, step: 5 }],
+      ranges: [{ from: 10, to: 75, step: 5 }],
       values: [],
     });
     expect(equipment.cable?.setup?.type).to.equal("stack");
