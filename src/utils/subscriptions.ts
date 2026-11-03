@@ -7,8 +7,12 @@ import { UidFactory_generateUid } from "./generator";
 import { CollectionUtils_removeBy } from "./collection";
 import { SubscriptionReceipts_cleanupApple } from "./subscriptionReceipts";
 import { Thunk_postevent } from "../ducks/thunks";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 export function Subscriptions_hasSubscription(subscription: ISubscription): boolean {
+  if (OfflineFork_isEnabled()) {
+    return true;
+  }
   if (subscription.key && subscription.key !== "unclaimed") {
     return true;
   }
@@ -105,6 +109,9 @@ export function Subscriptions_cleanupOutdatedAppleReceipts(
   service: Service,
   subscription: ISubscription
 ): Promise<void> {
+  if (OfflineFork_isEnabled()) {
+    return Promise.resolve();
+  }
   return Promise.all(
     subscription.apple.map<Promise<[string, boolean]>>(async (value) => {
       return [value.value, await Subscriptions_verifyAppleReceipt(userId, service, value.value)];
@@ -131,6 +138,9 @@ export function Subscriptions_cleanupOutdatedGooglePurchaseTokens(
   service: Service,
   subscription: ISubscription
 ): Promise<void> {
+  if (OfflineFork_isEnabled()) {
+    return Promise.resolve();
+  }
   return Promise.all(
     subscription.google.map<Promise<[string, boolean]>>(async (token) => {
       return [token.id, await Subscriptions_verifyGooglePurchaseToken(service, userId, token.value)];

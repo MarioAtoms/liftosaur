@@ -24,6 +24,45 @@ import {
   IHistoryDeltaLocal,
 } from "../utils/historyDelta";
 import { HistoryIds_MAX } from "../utils/historyIds";
+import { OfflineFork_isEnabled } from "../offlineFork";
+
+function Service_requestUrl(input: RequestInfo | URL): string {
+  if (typeof input === "string") {
+    return input;
+  }
+  if (input instanceof URL) {
+    return input.toString();
+  }
+  return input.url;
+}
+
+function Service_isUpstreamUrl(url: string): boolean {
+  if (
+    url.includes("liftosaur.com") ||
+    url.includes("rollbar.com") ||
+    url.includes("googletagmanager.com") ||
+    url.includes("google-analytics.com") ||
+    url.includes("redditstatic.com")
+  ) {
+    return true;
+  }
+  const path = url.startsWith("http") ? UrlUtils_build(url).pathname : url;
+  return path.startsWith("/api/");
+}
+
+function Service_offlineClient(client: Window["fetch"]): Window["fetch"] {
+  return (input, init) => {
+    if (Service_isUpstreamUrl(Service_requestUrl(input))) {
+      return Promise.resolve(
+        new Response(JSON.stringify({ error: "offline-fork" }), {
+          status: 404,
+          headers: { "content-type": "application/json" },
+        })
+      );
+    }
+    return client(input, init);
+  };
+}
 
 export type IPostSyncHistory = { mode: "page" } | { mode: "none" } | { mode: "delta"; local: IHistoryDeltaLocal };
 
@@ -225,7 +264,7 @@ export class Service {
   public readonly client: Window["fetch"];
 
   constructor(client: Window["fetch"]) {
-    this.client = client;
+    this.client = OfflineFork_isEnabled() ? Service_offlineClient(client) : client;
   }
 
   public async googleSignIn(
@@ -884,6 +923,9 @@ export class Service {
   }
 
   public async postEvent(event: IEventPayload): Promise<void> {
+    if (OfflineFork_isEnabled()) {
+      return;
+    }
     const nosync =
       typeof window !== "undefined" && UrlUtils_build(window.location.href).searchParams.get("nosync") === "true";
     if (nosync) {

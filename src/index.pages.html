@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" class="liftosaur-app">
+  <head>
+    <title>Mario Lift</title>
+    <link rel="stylesheet" type="text/css" href="__ASSET_BASE__/app.css?version=xxxxxxxx" />
+    <link rel="manifest" href="__ASSET_BASE__/manifest.json" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1, height=device-height"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Mario Lift" />
+    <link rel="preload" href="__ASSET_BASE__/images/front-muscles.svg" as="image" />
+    <link rel="preload" href="__ASSET_BASE__/images/back-muscles.svg" as="image" />
+    <link rel="preload" href="__ASSET_BASE__/images/svgs/muscles-combined.svg" as="image" />
+    <link rel="shortcut icon" type="image/png" href="__ASSET_BASE__/icons/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="__ASSET_BASE__/icons/icon512.png" />
+    <meta name="theme-color" content="#5b21b6" />
+    <meta
+      name="description"
+      content="Mario Lift is a personal offline copy of Liftosaur. Workouts stay on this device."
+    />
+    <script>
+      window.Rollbar = {
+        configure: function () {},
+        error: function () {},
+        warn: function () {},
+        warning: function () {},
+        info: function () {},
+        log: function () {},
+        critical: function () {},
+        captureEvent: function () {},
+      };
+    </script>
+    <style>
+      html,
+      #app {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body class="bg-background-default text-text-primary">
+    <div id="app"></div>
+    <div id="modal"></div>
+    <div id="bottomsheet"></div>
+    <div id="keyboard"></div>
+    <noscript>JavaScript is required for Mario Lift to work</noscript>
+    <script src="__ASSET_BASE__/vendors.js?vendor=xxxxxxxx"></script>
+    <script src="__ASSET_BASE__/app.js?version=xxxxxxxx"></script>
+  </body>
+</html>

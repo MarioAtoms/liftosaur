@@ -84,6 +84,7 @@ import {
   Subscriptions_verifyGooglePurchaseToken,
   Subscriptions_setGooglePurchaseToken,
 } from "../utils/subscriptions";
+import { OfflineFork_isEnabled } from "../offlineFork";
 import { IIapPurchase, IIapPurchaseError } from "../utils/iapAdapter";
 import {
   IapHelpers_alertAlreadySubscribed,
@@ -577,7 +578,10 @@ async function switchToSyncAccount(
     hasLocalCopy: localStorageResult?.success === true && localStorageResult.data.tempUserId === mismatch.userId,
   });
   if (plan === "load-local" && localCopy != null) {
-    const newState = await getInitialState(env.service.client, { localStorage: localCopy, deviceId: getState().deviceId });
+    const newState = await getInitialState(env.service.client, {
+      localStorage: localCopy,
+      deviceId: getState().deviceId,
+    });
     newState.user = { id: mismatch.userId, email: mismatch.email };
     dispatch({ type: "ReplaceState", state: newState });
     dispatch(Thunk_fetchInitial());
@@ -1479,6 +1483,9 @@ export function Thunk_maybeRequestReview(): IThunk {
 
 export function Thunk_maybeRequestSignup(): IThunk {
   return async (dispatch, getState) => {
+    if (OfflineFork_isEnabled()) {
+      return;
+    }
     try {
       const history = getState().storage.history;
       const state = getState();

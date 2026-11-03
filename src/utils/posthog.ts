@@ -3,6 +3,7 @@ import { WatchHost_isAvailable, WatchHost_send } from "./watchHost";
 import { AppAttribution_get } from "./appAttribution";
 import { EventManager_isAvailable, EventManager_log } from "./eventManager";
 import { AdminDebug_isDebugAccountId } from "../models/adminDebug";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 declare let __COMMIT_HASH__: string;
 
@@ -14,7 +15,7 @@ export function track(args: {
   googlename?: string;
   extra?: Record<string, string | number>;
 }): void {
-  if (typeof window === "undefined") {
+  if (OfflineFork_isEnabled() || typeof window === "undefined") {
     return;
   }
   const eventName = args.name || args.googlename || args.redditname || "";
@@ -46,6 +47,9 @@ export function lg(
   tempUserId?: string,
   timestamp?: number
 ): void {
+  if (OfflineFork_isEnabled()) {
+    return;
+  }
   tempUserId =
     tempUserId ??
     (typeof globalThis !== "undefined" ? (globalThis as { tempUserId?: string }).tempUserId : undefined) ??

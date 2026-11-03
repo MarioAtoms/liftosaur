@@ -1,3 +1,37 @@
+# Mario Lift
+
+This repository is Mario's personal fork of [Liftosaur](https://github.com/astashov/liftosaur). Liftosaur is free software under the GNU AGPL-3.0. See `LICENSE`.
+
+The fork builds a standalone offline PWA. Workouts stay in IndexedDB on the device. JSON export and import still work from Settings. Sign-in, cloud sync, and other calls to liftosaur.com are turned off. Premium screens in this build (graphs, plates calculator, muscle map, week insights) are unlocked on the device. The installed name is **Mario Lift**, so the home-screen label is not Liftosaur.
+
+Source for this fork: https://github.com/MarioAtoms/liftosaur
+
+Upstream: https://github.com/astashov/liftosaur
+
+## Deploy to GitHub Pages
+
+The site is `https://marioatoms.github.io/liftosaur/`. The app is `https://marioatoms.github.io/liftosaur/app/`.
+
+GitHub does not let this workflow turn Pages on by itself. Do this once:
+
+1. Open the repository on GitHub.
+2. Go to Settings, then Pages.
+3. Set Source to GitHub Actions.
+4. Merge to `master`, or run the Pages workflow from the Actions tab.
+
+Android Chrome: open the app URL, then use the menu and choose Add to Home screen or Install app.
+
+Local build:
+
+```bash
+npm ci
+npm run build:pages
+```
+
+`dist/` is the static site. Serve it so the files are under `/liftosaur/`. The service worker and manifest use that base path. Override it with `PAGES_BASE` if the Pages URL is different.
+
+The original Liftosaur README follows.
+
 # 🏋 Liftosaur: Open-source powerful weight lifting tracker PWA for coders.
 
 * Link: https://www.liftosaur.com

@@ -31,6 +31,74 @@ const localapi = `https://${localapidomain}.liftosaur.com:${localapiport}/`;
 const local = `https://${localdomain}.liftosaur.com:${localport}/`;
 
 const isDev = process.env.NODE_ENV !== "production";
+const offlineFork = process.env.OFFLINE_FORK === "1";
+
+function pagesAssetBase() {
+  if (!offlineFork) {
+    return "";
+  }
+  const raw = process.env.PAGES_BASE || "/liftosaur";
+  const withLead = raw.startsWith("/") ? raw : `/${raw}`;
+  return withLead.endsWith("/") ? withLead.slice(0, -1) : withLead;
+}
+
+const pagesBase = pagesAssetBase();
+
+function manifestCopy(filename) {
+  return {
+    from: "manifest.webmanifest",
+    to: filename,
+    transform: (content) => {
+      if (!offlineFork) {
+        return content;
+      }
+      const manifest = JSON.parse(content.toString());
+      manifest.short_name = "Mario Lift";
+      manifest.name = "Mario Lift";
+      manifest.description = "Personal offline copy of Liftosaur. Workouts stay on this device.";
+      manifest.start_url = `${pagesBase}/app/`;
+      manifest.scope = `${pagesBase}/`;
+      manifest.id = `${pagesBase}/app/`;
+      manifest.display = "standalone";
+      manifest.theme_color = "#5b21b6";
+      manifest.background_color = "#ffffff";
+      manifest.prefer_related_applications = false;
+      delete manifest.related_applications;
+      if (Array.isArray(manifest.icons)) {
+        manifest.icons = manifest.icons.map((icon) => ({
+          ...icon,
+          src: typeof icon.src === "string" && icon.src.startsWith("/") ? `${pagesBase}${icon.src}` : icon.src,
+        }));
+      }
+      return JSON.stringify(manifest, null, 2);
+    },
+  };
+}
+
+function prefixAssetPathsPlugin(base) {
+  const { prefixAssetPaths } = require("./scripts/prefixAssetPaths");
+  return {
+    apply(compiler) {
+      compiler.hooks.compilation.tap("PrefixAssetPathsPlugin", (compilation) => {
+        compilation.hooks.processAssets.tap(
+          { name: "PrefixAssetPathsPlugin", stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE },
+          (assets) => {
+            for (const [name, source] of Object.entries(assets)) {
+              if (name === "webpushr-sw.js" || !/\.(js|css|html|webmanifest)$/.test(name) || name.endsWith(".map")) {
+                continue;
+              }
+              const text = source.source().toString();
+              const next = prefixAssetPaths(text, base);
+              if (next !== text) {
+                compilation.updateAsset(name, new sources.RawSource(next));
+              }
+            }
+          }
+        );
+      });
+    },
+  };
+}
 
 const uniwindRnRewrite = new NormalModuleReplacementPlugin(/^react-native$/, (resource) => {
   const issuer = (resource.contextInfo && resource.contextInfo.issuer) || resource.context || "";
@@ -41,15 +109,19 @@ const uniwindRnRewrite = new NormalModuleReplacementPlugin(/^react-native$/, (re
   }
 });
 
-const uniwindStyleSheetRewrite = new NormalModuleReplacementPlugin(
-  /createOrderedCSSStyleSheet$/,
-  (resource) => {
-    const issuer = (resource.contextInfo && resource.contextInfo.issuer) || resource.context || "";
-    if (issuer.includes(`${require("path").sep}react-native-web${require("path").sep}dist${require("path").sep}exports${require("path").sep}StyleSheet${require("path").sep}`)) {
-      resource.request = require("path").resolve(__dirname, "node_modules/uniwind/dist/module/components/web/createOrderedCSSStyleSheet.js");
-    }
+const uniwindStyleSheetRewrite = new NormalModuleReplacementPlugin(/createOrderedCSSStyleSheet$/, (resource) => {
+  const issuer = (resource.contextInfo && resource.contextInfo.issuer) || resource.context || "";
+  if (
+    issuer.includes(
+      `${require("path").sep}react-native-web${require("path").sep}dist${require("path").sep}exports${require("path").sep}StyleSheet${require("path").sep}`
+    )
+  ) {
+    resource.request = require("path").resolve(
+      __dirname,
+      "node_modules/uniwind/dist/module/components/web/createOrderedCSSStyleSheet.js"
+    );
   }
-);
+});
 
 const lftMarkerPlugin = {
   apply(compiler) {
@@ -59,10 +131,7 @@ const lftMarkerPlugin = {
         (assets) => {
           for (const [name, source] of Object.entries(assets)) {
             if (/\.(js|css)$/.test(name) && !name.includes(".map")) {
-              compilation.updateAsset(
-                name,
-                new sources.ConcatSource("/* LFTSTART */\n", source, "\n/* LFTEND */")
-              );
+              compilation.updateAsset(name, new sources.ConcatSource("/* LFTSTART */\n", source, "\n/* LFTEND */"));
             }
           }
         }
@@ -139,6 +208,7 @@ const watchConfig = {
 };
 
 const mainConfig = {
+  name: "main",
   ignoreWarnings: [
     {
       module: /@legendapp\/list/,
@@ -182,7 +252,7 @@ const mainConfig = {
   output: {
     filename: "[name].js",
     chunkFilename: "chunks/[name].[contenthash].js",
-    publicPath: "/",
+    publicPath: offlineFork ? `${pagesBase}/` : "/",
     path: path.resolve(__dirname, "dist"),
   },
   devtool: false,
@@ -239,10 +309,14 @@ const mainConfig = {
     uniwindRnRewrite,
     uniwindStyleSheetRewrite,
     lftMarkerPlugin,
-    new SourceMapDevToolPlugin({
-      append: `\n//# sourceMappingURL=[url]?version=${commitHash}`,
-      filename: "[file].map",
-    }),
+    ...(offlineFork
+      ? []
+      : [
+          new SourceMapDevToolPlugin({
+            append: `\n//# sourceMappingURL=[url]?version=${commitHash}`,
+            filename: "[file].map",
+          }),
+        ]),
     new MiniCssExtractPlugin({ filename: "[name].css" }),
     new DefinePlugin({
       "process.env.JEST_WORKER_ID": "undefined",
@@ -250,28 +324,37 @@ const mainConfig = {
       __COMMIT_HASH__: JSON.stringify(commitHash),
       __FULL_COMMIT_HASH__: JSON.stringify(fullCommitHash),
       __API_HOST__: JSON.stringify(
-        process.env.NODE_ENV === "production"
-          ? process.env.STAGE
-            ? "https://api3-dev.liftosaur.com"
-            : "https://api3.liftosaur.com"
-          : `https://${localapidomain}.liftosaur.com:${localapiport}`
+        offlineFork
+          ? ""
+          : process.env.NODE_ENV === "production"
+            ? process.env.STAGE
+              ? "https://api3-dev.liftosaur.com"
+              : "https://api3.liftosaur.com"
+            : `https://${localapidomain}.liftosaur.com:${localapiport}`
       ),
-      __ENV__: JSON.stringify(process.env.NODE_ENV === "production" ? "production" : "development"),
+      __ENV__: JSON.stringify(
+        offlineFork ? "offline-fork" : process.env.NODE_ENV === "production" ? "production" : "development"
+      ),
       __HOST__: JSON.stringify(
-        process.env.NODE_ENV === "production"
-          ? process.env.STAGE
-            ? "https://stage.liftosaur.com"
-            : "https://www.liftosaur.com"
-          : `https://${localdomain}.liftosaur.com:${localport}`
+        offlineFork
+          ? ""
+          : process.env.NODE_ENV === "production"
+            ? process.env.STAGE
+              ? "https://stage.liftosaur.com"
+              : "https://www.liftosaur.com"
+            : `https://${localdomain}.liftosaur.com:${localport}`
       ),
+      __OFFLINE_FORK__: JSON.stringify(offlineFork),
+      __ASSET_BASE__: JSON.stringify(pagesBase),
     }),
     new CopyPlugin([
       {
-        from: `src/index.html`,
+        from: offlineFork ? `src/index.pages.html` : `src/index.html`,
         to: `app/index.html`,
         transform: (content) => {
           return content
             .toString()
+            .replace(/__ASSET_BASE__/g, pagesBase)
             .replace(/\?version=xxxxxxxx/g, `?version=${commitHash}`)
             .replace(/\?vendor=xxxxxxxx/g, `?vendor=${commitHash}`);
         },
@@ -352,7 +435,7 @@ const mainConfig = {
         to: `get-ready-end.m4r`,
       },
       {
-        from: "icons",
+        from: offlineFork ? "fork/icons" : "icons",
         to: "icons",
       },
       {
@@ -367,10 +450,8 @@ const mainConfig = {
         from: "programdata",
         to: "programdata",
       },
-      {
-        from: "manifest.webmanifest",
-        to: "manifest.webmanifest",
-      },
+      manifestCopy("manifest.webmanifest"),
+      manifestCopy("manifest.json"),
       {
         from: "assetlinks.json",
         to: ".well-known/assetlinks.json",
@@ -384,7 +465,14 @@ const mainConfig = {
         to: ".well-known/openai-apps-challenge",
         toType: "file",
       },
+      ...(offlineFork
+        ? [
+            { from: "fork/pages-index.html", to: "index.html" },
+            { from: "fork/nojekyll", to: ".nojekyll" },
+          ]
+        : []),
     ]),
+    ...(offlineFork ? [prefixAssetPathsPlugin(pagesBase)] : []),
   ],
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
   watchOptions: {
@@ -661,5 +749,12 @@ const mainConfig = {
     },
   },
 };
+
+if (offlineFork) {
+  mainConfig.entry = {
+    app: ["./src/index.tsx", "./src/index.css"],
+    "webpushr-sw": "./src/webpushr-sw.ts",
+  };
+}
 
 module.exports = [mainConfig, watchConfig];

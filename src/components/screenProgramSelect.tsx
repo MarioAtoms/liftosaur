@@ -17,6 +17,7 @@ import { IconEquipmentKettlebell } from "./icons/iconEquipmentKettlebell";
 import { Tailwind_semantic } from "../utils/tailwindConfig";
 import { ImagePreloader_uri } from "../utils/imagePreloader";
 import { useTrackClick } from "../utils/clickTracking";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 interface IScreenProgramSelectProps {
   dispatch: IDispatch;
@@ -65,7 +66,7 @@ export function ScreenProgramSelect(props: IScreenProgramSelectProps): JSX.Eleme
       description: "You can run adhoc workouts, and build the program along the way",
       onClick: () => Program_selectProgramAndGoHome(props.dispatch, emptyProgramId),
     },
-  ];
+  ].filter((opt) => !(OfflineFork_isEnabled() && opt.key === "import"));
 
   return (
     <View

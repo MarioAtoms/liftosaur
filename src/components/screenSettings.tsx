@@ -38,6 +38,7 @@ import { LinkButton } from "./linkButton";
 import { Features_isEnabled } from "../utils/features";
 import { Slider } from "./primitives/slider";
 import { usePerfRenderCount } from "../utils/usePerfRenderCount";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 interface IProps {
   dispatch: IDispatch;
@@ -81,20 +82,31 @@ function ScreenSettingsInner(props: IProps): JSX.Element {
         }}
       />
       <GroupHeader name="Account" topPadding={true} />
-      <MenuItem
-        name="Account"
-        value={
-          props.user?.email == null ? (
-            <Text className="text-text-error">Not signed in</Text>
-          ) : props.user?.email === "noemail@example.com" ? (
-            "Signed In"
-          ) : (
-            StringUtils_truncate(props.user?.email || "", 30)
-          )
-        }
-        shouldShowRightArrow={true}
-        onClick={() => props.dispatch(Thunk_pushScreen("account"))}
-      />
+      {OfflineFork_isEnabled() ? (
+        <>
+          <MenuItem name="Cloud sign-in" value="Off" />
+          <View className="pb-3 border-b border-border-neutral">
+            <Text className="text-xs text-text-secondary">
+              Workouts stay on this device. Sign-in and cloud sync are off.
+            </Text>
+          </View>
+        </>
+      ) : (
+        <MenuItem
+          name="Account"
+          value={
+            props.user?.email == null ? (
+              <Text className="text-text-error">Not signed in</Text>
+            ) : props.user?.email === "noemail@example.com" ? (
+              "Signed In"
+            ) : (
+              StringUtils_truncate(props.user?.email || "", 30)
+            )
+          }
+          shouldShowRightArrow={true}
+          onClick={() => props.dispatch(Thunk_pushScreen("account"))}
+        />
+      )}
       <MenuItemEditable
         type="text"
         name="Nickname"
@@ -114,7 +126,7 @@ function ScreenSettingsInner(props: IProps): JSX.Element {
           });
         }}
       />
-      {props.user && (
+      {!OfflineFork_isEnabled() && props.user && (
         <MenuItemEditable
           type="boolean"
           name="Is Profile Page Public?"
@@ -163,11 +175,13 @@ function ScreenSettingsInner(props: IProps): JSX.Element {
         />
       )}
 
-      <MenuItem
-        name="API Keys"
-        shouldShowRightArrow={true}
-        onClick={() => props.dispatch(Thunk_pushScreen("apiKeys"))}
-      />
+      {!OfflineFork_isEnabled() && (
+        <MenuItem
+          name="API Keys"
+          shouldShowRightArrow={true}
+          onClick={() => props.dispatch(Thunk_pushScreen("apiKeys"))}
+        />
+      )}
 
       <GroupHeader name="My Measurements" topPadding={true} />
       {currentBodyweight && (
@@ -509,60 +523,106 @@ function ScreenSettingsInner(props: IProps): JSX.Element {
 
       <GroupHeader name="Miscellaneous" topPadding={true} />
       <MenuItem name="Changelog" onClick={() => WhatsNew_showWhatsNew(props.dispatch)} />
+      {OfflineFork_isEnabled() && <ForkAbout />}
+      {!OfflineFork_isEnabled() && (
+        <>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("mailto:info@liftosaur.com")}
+          >
+            <Text className="text-base text-text-primary">Contact Us</Text>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://discord.com/invite/AAh3cvdBRs")}
+          >
+            <View className="flex-row items-center">
+              <View className="pr-2">
+                <IconDiscord />
+              </View>
+              <Text className="text-base text-text-primary">Discord Server</Text>
+            </View>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://www.liftosaur.com/privacy.html")}
+          >
+            <Text className="text-base text-text-primary">Privacy Policy</Text>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://www.liftosaur.com/terms.html")}
+          >
+            <Text className="text-base text-text-primary">Terms & Conditions</Text>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://www.liftosaur.com/licenses.html")}
+          >
+            <Text className="text-base text-text-primary">Licenses</Text>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://www.liftosaur.com/doc")}
+          >
+            <Text className="text-base text-text-primary">Documentation</Text>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://github.com/astashov/liftosaur")}
+          >
+            <Text className="text-base text-text-primary">Source Code on Github</Text>
+          </Pressable>
+          <Pressable
+            className="py-3 border-b border-border-neutral"
+            onPress={() => openExternal("https://github.com/astashov/liftosaur/discussions")}
+          >
+            <Text className="text-base text-text-primary">📍 Roadmap</Text>
+          </Pressable>
+        </>
+      )}
+    </View>
+  );
+}
+
+declare let __ASSET_BASE__: string;
+
+function ForkAbout(): JSX.Element {
+  const base = typeof __ASSET_BASE__ !== "undefined" ? __ASSET_BASE__ : "";
+  return (
+    <>
+      <View className="py-3 border-b border-border-neutral">
+        <Text className="text-base text-text-primary">Mario Lift</Text>
+        <Text className="mt-1 text-xs text-text-secondary">
+          Personal offline copy of Liftosaur. Workouts stay in this browser.
+        </Text>
+        <Text className="mt-2 text-xs text-text-secondary">
+          Liftosaur is free software under the GNU Affero General Public License, version 3. You can run, study, change,
+          and share it. If you serve a changed copy over a network, you must offer the source.
+        </Text>
+      </View>
       <Pressable
         className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("mailto:info@liftosaur.com")}
+        onPress={() => openExternal("https://github.com/MarioAtoms/liftosaur")}
       >
-        <Text className="text-base text-text-primary">Contact Us</Text>
+        <Text className="text-base text-text-primary">Source code (AGPL-3.0)</Text>
       </Pressable>
       <Pressable
         className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("https://discord.com/invite/AAh3cvdBRs")}
+        onPress={() => openExternal("https://www.gnu.org/licenses/agpl-3.0.html")}
       >
-        <View className="flex-row items-center">
-          <View className="pr-2">
-            <IconDiscord />
-          </View>
-          <Text className="text-base text-text-primary">Discord Server</Text>
-        </View>
-      </Pressable>
-      <Pressable
-        className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("https://www.liftosaur.com/privacy.html")}
-      >
-        <Text className="text-base text-text-primary">Privacy Policy</Text>
-      </Pressable>
-      <Pressable
-        className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("https://www.liftosaur.com/terms.html")}
-      >
-        <Text className="text-base text-text-primary">Terms & Conditions</Text>
-      </Pressable>
-      <Pressable
-        className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("https://www.liftosaur.com/licenses.html")}
-      >
-        <Text className="text-base text-text-primary">Licenses</Text>
-      </Pressable>
-      <Pressable
-        className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("https://www.liftosaur.com/doc")}
-      >
-        <Text className="text-base text-text-primary">Documentation</Text>
+        <Text className="text-base text-text-primary">AGPL-3.0 license text</Text>
       </Pressable>
       <Pressable
         className="py-3 border-b border-border-neutral"
         onPress={() => openExternal("https://github.com/astashov/liftosaur")}
       >
-        <Text className="text-base text-text-primary">Source Code on Github</Text>
+        <Text className="text-base text-text-primary">Upstream Liftosaur</Text>
       </Pressable>
-      <Pressable
-        className="py-3 border-b border-border-neutral"
-        onPress={() => openExternal("https://github.com/astashov/liftosaur/discussions")}
-      >
-        <Text className="text-base text-text-primary">📍 Roadmap</Text>
+      <Pressable className="py-3 border-b border-border-neutral" onPress={() => openExternal(`${base}/licenses.html`)}>
+        <Text className="text-base text-text-primary">Third-party licenses</Text>
       </Pressable>
-    </View>
+    </>
   );
 }
 
