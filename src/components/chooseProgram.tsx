@@ -15,6 +15,7 @@ import { Tailwind_semantic } from "../utils/tailwindConfig";
 import { useRemScale } from "../utils/useRem";
 import { LinkButton } from "./linkButton";
 import { navigateToModal } from "../navigation/navigationService";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 interface IProps {
   dispatch: IDispatch;
@@ -36,16 +37,18 @@ export function ChooseProgramView(props: IProps): JSX.Element {
 
   useNavOptions({
     navTitle: "Choose a program",
-    navRightButtons: [
-      <LinkButton
-        key="import"
-        className="px-2 text-sm no-underline"
-        name="import-program"
-        onClick={() => navigateToModal("importFromLinkModal")}
-      >
-        Import
-      </LinkButton>,
-    ],
+    navRightButtons: OfflineFork_isEnabled()
+      ? []
+      : [
+          <LinkButton
+            key="import"
+            className="px-2 text-sm no-underline"
+            name="import-program"
+            onClick={() => navigateToModal("importFromLinkModal")}
+          >
+            Import
+          </LinkButton>,
+        ],
   });
 
   return (

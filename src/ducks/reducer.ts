@@ -88,6 +88,7 @@ import { PerfProbe_onAction } from "../utils/perfSetCompleteProbe";
 import { HermesProfile_captureOnce } from "../utils/hermesProfile";
 import { PerfScorecard_recordAction } from "../utils/perfScorecard";
 import { EquipmentUnits_follow } from "../models/equipmentUnits";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 declare let __COMMIT_HASH__: string;
 
@@ -116,7 +117,7 @@ export async function getInitialState(
     (typeof document !== "undefined" ? UrlUtils_build(document.location.href) : UrlUtils_build(`${__HOST__}/app/`));
   const messageerror = url.searchParams.get("messageerror") || undefined;
   const messagesuccess = url.searchParams.get("messagesuccess") || undefined;
-  const nosync = url.searchParams.get("nosync") === "true";
+  const nosync = url.searchParams.get("nosync") === "true" || OfflineFork_isEnabled();
   let storage: ILocalStorage | undefined;
   if (args?.storage) {
     storage = { storage: args.storage };
@@ -145,6 +146,15 @@ export async function getInitialState(
     const errors: IStateErrors = {};
     if (maybeStorage.success) {
       finalStorage = maybeStorage.data;
+    } else if (OfflineFork_isEnabled()) {
+      const userid = (storage.storage?.tempUserId || `missing-${UidFactory_generateUid(8)}`) as string;
+      errors.corruptedstorage = {
+        userid,
+        backup: false,
+        confirmed: false,
+        local: true,
+      };
+      finalStorage = Storage_getDefault();
     } else {
       const service = new Service(client);
       const userid = (storage.storage?.tempUserId || `missing-${UidFactory_generateUid(8)}`) as string;

@@ -1,5 +1,6 @@
 import { IState } from "./state";
 import { WhatsNew_doesHaveNewUpdates } from "./whatsnew";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 export type IOnloadModal = "whatsnew" | "hearaboutus";
 
@@ -10,7 +11,7 @@ export function OnloadModal_shouldShowWhatsNew(state: IState): boolean {
 }
 
 export function OnloadModal_shouldShowHearAboutUs(state: IState): boolean {
-  if (state.storage.currentProgramId == null) {
+  if (OfflineFork_isEnabled() || state.storage.currentProgramId == null) {
     return false;
   }
   const hearAboutUs = state.storage.hearAboutUs;

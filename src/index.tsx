@@ -5,7 +5,10 @@ import { RollbarUtils_config } from "./utils/rollbar";
 
 declare let Rollbar: RB;
 declare let __ENV__: string;
-Rollbar.configure(RollbarUtils_config());
+declare let __ASSET_BASE__: string;
+if (typeof Rollbar !== "undefined" && Rollbar != null) {
+  Rollbar.configure(RollbarUtils_config());
+}
 
 import { AppView } from "./components/app";
 import { AudioInterface } from "./lib/audioInterface";
@@ -23,7 +26,8 @@ import { DeviceId_get } from "./utils/deviceId";
 IndexedDBUtils_initializeForSafari();
 
 if ("serviceWorker" in navigator && (typeof window === "undefined" || window.location.protocol.startsWith("http"))) {
-  navigator.serviceWorker.register("/webpushr-sw.js");
+  const assetBase = typeof __ASSET_BASE__ !== "undefined" ? __ASSET_BASE__ : "";
+  navigator.serviceWorker.register(`${assetBase}/webpushr-sw.js`, { scope: `${assetBase}/` }).catch(() => undefined);
 }
 
 console.log(DateUtils_formatYYYYMMDDHHMM(Date.now()));
@@ -44,7 +48,9 @@ async function initialize(loadedData: ILocalStorage | undefined): Promise<void> 
       initialState.adminKey = adminKey;
     }
     const uid = initialState.user?.id || initialState.storage.tempUserId;
-    Rollbar.configure(RollbarUtils_config({ person: { id: uid } }));
+    if (typeof Rollbar !== "undefined" && Rollbar != null) {
+      Rollbar.configure(RollbarUtils_config({ person: { id: uid } }));
+    }
     (window as any).state = initialState;
     (window as any).service = new Service(window.fetch.bind(window));
     const queue = new AsyncQueue();
@@ -61,7 +67,9 @@ async function initialize(loadedData: ILocalStorage | undefined): Promise<void> 
     );
   } catch (e) {
     console.error(e);
-    Rollbar.error("Failed to initialize app", e instanceof Error ? e : new Error(String(e)));
+    if (typeof Rollbar !== "undefined" && Rollbar != null) {
+      Rollbar.error("Failed to initialize app", e instanceof Error ? e : new Error(String(e)));
+    }
   }
 }
 
@@ -82,7 +90,9 @@ main();
 setTimeout(() => {
   const appEl = document.getElementById("app");
   if (appEl && appEl.childElementCount === 0) {
-    Rollbar.error("White screen detected - app failed to render after 10s");
+    if (typeof Rollbar !== "undefined" && Rollbar != null) {
+      Rollbar.error("White screen detected - app failed to render after 10s");
+    }
   }
 }, 10000);
 

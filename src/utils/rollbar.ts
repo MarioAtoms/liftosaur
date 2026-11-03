@@ -8,6 +8,7 @@ import {
   Diagnostics_getLastState,
   Diagnostics_getLastValidationErrors,
 } from "./diagnostics";
+import { OfflineFork_isEnabled } from "../offlineFork";
 
 declare let __ENV__: string;
 declare let __FULL_COMMIT_HASH__: string;
@@ -92,7 +93,8 @@ export function RollbarUtils_checkIgnore(isUncaught: boolean, args: LogArgument[
 
 export function RollbarUtils_config(payload?: object): RB.Configuration {
   return {
-    enabled: __ENV__ === "production" || __ENV__ === "prod-lambda" || __ENV__ === "android",
+    enabled:
+      !OfflineFork_isEnabled() && (__ENV__ === "production" || __ENV__ === "prod-lambda" || __ENV__ === "android"),
     payload: {
       environment: __ENV__,
       client: {
@@ -106,6 +108,9 @@ export function RollbarUtils_config(payload?: object): RB.Configuration {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transform: async (pld: any, item: any) => {
+      if (OfflineFork_isEnabled()) {
+        return;
+      }
       const shouldIgnore = RollbarUtils_checkIgnore(false, [item?.err?.message], item);
       if (shouldIgnore) {
         return;
