@@ -11,6 +11,7 @@ export interface IProgramPayload {
 }
 
 export const programOrder = [
+  "mario-home",
   "basicBeginner",
   "the5314b",
   "the531bbb",
