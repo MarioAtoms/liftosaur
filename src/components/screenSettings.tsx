@@ -39,6 +39,7 @@ import { Features_isEnabled } from "../utils/features";
 import { Slider } from "./primitives/slider";
 import { usePerfRenderCount } from "../utils/usePerfRenderCount";
 import { OfflineFork_isEnabled } from "../offlineFork";
+import { GithubSyncSettings } from "./githubSyncSettings";
 
 interface IProps {
   dispatch: IDispatch;
@@ -107,6 +108,7 @@ function ScreenSettingsInner(props: IProps): JSX.Element {
           onClick={() => props.dispatch(Thunk_pushScreen("account"))}
         />
       )}
+      {OfflineFork_isEnabled() && <GithubSyncSettings dispatch={props.dispatch} />}
       <MenuItemEditable
         type="text"
         name="Nickname"
