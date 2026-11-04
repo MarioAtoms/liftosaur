@@ -41,7 +41,7 @@ export const workoutTourConfig: ITourConfig = {
   steps: [
     {
       id: "howItWorks",
-      title: "How Liftosaur works",
+      title: "How Strength and Honor works",
       dino: "dinocoach.svg",
       content: () => (
         <>

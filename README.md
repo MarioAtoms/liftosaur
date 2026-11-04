@@ -1,8 +1,8 @@
-# Mario Lift
+# Strength and Honor
 
 This repository is Mario's personal fork of [Liftosaur](https://github.com/astashov/liftosaur). Liftosaur is free software under the GNU AGPL-3.0. See `LICENSE`.
 
-The fork builds a standalone offline PWA. Workouts stay in IndexedDB on the device. JSON export and import still work from Settings. Sign-in, cloud sync, and other calls to liftosaur.com are turned off. Premium screens in this build (graphs, plates calculator, muscle map, week insights) are unlocked on the device. The installed name is **Mario Lift**, so the home-screen label is not Liftosaur.
+The fork builds a standalone offline PWA. Workouts stay in IndexedDB on the device. JSON export and import still work from Settings. Sign-in, cloud sync, and other calls to liftosaur.com are turned off. Premium screens in this build (graphs, plates calculator, muscle map, week insights) are unlocked on the device. The installed name is **Strength and Honor**. The home-screen label comes from the manifest. An install that already used the old name may need to be removed and added again before the home screen updates.
 
 Source for this fork: https://github.com/MarioAtoms/liftosaur
 

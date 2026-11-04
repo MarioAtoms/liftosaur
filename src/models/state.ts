@@ -34,6 +34,7 @@ import type { IWatchBridge } from "../utils/watchBridge";
 import type { IKeychain } from "../utils/keychain";
 import type { IWorkoutMirroring } from "../utils/workoutMirroring";
 import type { IHeartRateStore } from "../utils/heartRateStore";
+import type { IGithubSyncNotice } from "../sync/githubSyncTypes";
 
 export type IEnv = {
   service: Service;
@@ -196,6 +197,7 @@ export interface IState {
   editProgramStates: Record<string, IPlannerState>;
   playgroundState?: IProgramPreviewPlaygroundState;
   importPreview?: IImportPreview;
+  githubSyncNotice?: IGithubSyncNotice;
 }
 
 export interface IImportPreview {

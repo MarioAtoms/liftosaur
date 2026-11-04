@@ -53,9 +53,9 @@ function manifestCopy(filename) {
         return content;
       }
       const manifest = JSON.parse(content.toString());
-      manifest.short_name = "Mario Lift";
-      manifest.name = "Mario Lift";
-      manifest.description = "Personal offline copy of Liftosaur. Workouts stay on this device.";
+      manifest.short_name = "Strength & Honor";
+      manifest.name = "Strength and Honor";
+      manifest.description = "Strength and Honor. A personal offline copy of Liftosaur. Workouts stay on this device.";
       manifest.start_url = `${pagesBase}/app/`;
       manifest.scope = `${pagesBase}/`;
       manifest.id = `${pagesBase}/app/`;

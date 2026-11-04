@@ -12,8 +12,7 @@
     "decision-in-view:useMemo#1": "predates the rule"
   },
   "src/components/app.tsx": {
-    "decision-in-view:useEffect#1": "predates the rule",
-    "long-view": "predates the rule"
+    "decision-in-view:useEffect#1": "predates the rule"
   },
   "src/components/bottomSheetEditTarget.tsx": {
     "decision-in-view:anonymous#1": "predates the rule",

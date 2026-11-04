@@ -17,7 +17,7 @@ export function HistoryRecordsNullState(): JSX.Element {
         )}
       </View>
       <View className="items-center w-full py-4 border border-border-cardpurple bg-background-cardpurple rounded-tl-2xl rounded-se-2xl">
-        <Text className="py-2 text-base font-semibold">Welcome to Liftosaur!</Text>
+        <Text className="py-2 text-base font-semibold">Welcome to Strength and Honor!</Text>
         <Text className="text-sm">Tap here to start a workout</Text>
         <View className="py-2">
           <IconArrowDown3 />

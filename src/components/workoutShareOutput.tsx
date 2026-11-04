@@ -45,7 +45,7 @@ export function WorkoutShareOutput(props: IWorkoutShareOutputProps): JSX.Element
             source={{ uri: HostConfig_resolveUrl("/images/icon512.png") }}
             className="w-scaled-6 h-scaled-6 rounded-md"
           />
-          <Text className="text-lg font-bold text-white">Liftosaur</Text>
+          <Text className="text-lg font-bold text-white">Strength and Honor</Text>
         </View>
         {numberOfRecordPrs > 0 && (
           <View className="pr-2 ml-auto items-end">

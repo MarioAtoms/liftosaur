@@ -27,6 +27,8 @@ import { Progress_getCurrentProgress } from "../models/progress";
 import { IEnv, IState, updateState } from "../models/state";
 import { Notification } from "./notification";
 import { Toast } from "./toast";
+import { GithubSyncBanner } from "./githubSyncBanner";
+import { GithubSync_bindPage } from "../sync/githubSyncPage";
 import { useOnloadModals } from "../navigation/useOnloadModals";
 import {
   Subscriptions_cleanupOutdatedAppleReceipts,
@@ -131,6 +133,10 @@ export function AppView(props: IProps): JSX.Element | null {
   });
   useEffect(() => {
     return ScreenRemovalCleanup_subscribe(dispatch);
+  }, []);
+
+  useEffect(() => {
+    return GithubSync_bindPage(dispatch);
   }, []);
 
   useEffect(() => {
@@ -368,6 +374,7 @@ export function AppView(props: IProps): JSX.Element | null {
             subscription={state.storage.subscription}
           />
         )}
+        <GithubSyncBanner notice={state.githubSyncNotice} dispatch={dispatch} />
         <Notification dispatch={dispatch} notification={state.notification} />
         <Toast toast={state.toast} dispatch={dispatch} />
       </SafeAreaProvider>

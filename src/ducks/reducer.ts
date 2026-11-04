@@ -66,6 +66,7 @@ import { UrlUtils_build } from "../utils/url";
 import { DateUtils_formatHHMMSS } from "../utils/date";
 import { IReducerOnAction } from "./types";
 import { Thunk_sync2, Thunk_checkSetTimer, Thunk_saveWorkoutToHealth } from "./thunks";
+import { Thunk_githubSyncFlush, Thunk_githubSyncSchedule } from "../sync/thunks";
 import { PushRegistration_identityChanged } from "../utils/pushRegistration";
 import { CollectionUtils_uniqBy, CollectionUtils_compact } from "../utils/collection";
 import { Subscriptions_cleanupOutdatedGooglePurchaseTokens } from "../utils/subscriptions";
@@ -420,6 +421,18 @@ export function defaultOnActions(env: IEnv): IReducerOnAction[] {
       const isFinishDayAction = "type" in action && action.type === "FinishProgramDayAction";
       if (!isExternalStorageMerge(action) && Storage_isChanged(oldState.storage, newState.storage)) {
         dispatch(Thunk_sync2({ log: isFinishDayAction }));
+      }
+    },
+    (dispatch, action, oldState, newState) => {
+      if (!OfflineFork_isEnabled() || typeof action === "function") {
+        return;
+      }
+      if (action.type === "FinishProgramDayAction") {
+        dispatch(Thunk_githubSyncFlush());
+        return;
+      }
+      if (!isExternalStorageMerge(action) && Storage_isChanged(oldState.storage, newState.storage)) {
+        dispatch(Thunk_githubSyncSchedule());
       }
     },
     (dispatch, action, oldState, newState) => {
