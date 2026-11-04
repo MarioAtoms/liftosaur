@@ -152,7 +152,7 @@ export const ProgramShareOutput = forwardRef((props: IProgramShareOutputProps, r
         })}
         <View className="flex-row items-center justify-end mt-1">
           <SvgUri uri={HostConfig_resolveUrl("/images/logo.svg")} width={24} height={24} style={{ marginRight: 4 }} />
-          <Text className="text-sm font-bold">Liftosaur</Text>
+          <Text className="text-sm font-bold">Strength and Honor</Text>
         </View>
       </View>
     </View>

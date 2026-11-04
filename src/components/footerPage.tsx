@@ -35,7 +35,7 @@ export function FooterPage(props: IProps): JSX.Element {
             </div>
 
             <div className="shrink-0">
-              <div className="pt-8 text-3xl font-bold text-text-alwayswhite md:pt-0">Liftosaur</div>
+              <div className="pt-8 text-3xl font-bold text-text-alwayswhite md:pt-0">Strength and Honor</div>
               <div className="flex items-center gap-4 mt-5">
                 <span className="text-sm text-text-alwayswhite">Follow us:</span>
                 <a

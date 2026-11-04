@@ -594,7 +594,7 @@ function ForkAbout(): JSX.Element {
   return (
     <>
       <View className="py-3 border-b border-border-neutral">
-        <Text className="text-base text-text-primary">Mario Lift</Text>
+        <Text className="text-base text-text-primary">Strength and Honor</Text>
         <Text className="mt-1 text-xs text-text-secondary">
           Personal offline copy of Liftosaur. Workouts stay in this browser.
         </Text>

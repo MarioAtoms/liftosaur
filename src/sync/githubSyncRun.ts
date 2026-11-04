@@ -133,9 +133,9 @@ export async function GithubSync_push(args: {
   const appliedResults = ProgramInbox_mergeResults(remoteResults, args.disk.appliedResults);
   const appliedJson = JSON.stringify({ results: appliedResults }, null, 2);
   const files = [
-    { path: GITHUB_SYNC_PATHS.storage, text: snapshot.storageJson, message: "Mario Lift backup" },
-    { path: GITHUB_SYNC_PATHS.meta, text: snapshot.metaJson, message: "Mario Lift backup meta" },
-    { path: GITHUB_SYNC_PATHS.applied, text: appliedJson, message: "Mario Lift coach results" },
+    { path: GITHUB_SYNC_PATHS.storage, text: snapshot.storageJson, message: "Strength and Honor backup" },
+    { path: GITHUB_SYNC_PATHS.meta, text: snapshot.metaJson, message: "Strength and Honor backup meta" },
+    { path: GITHUB_SYNC_PATHS.applied, text: appliedJson, message: "Strength and Honor coach results" },
   ];
   const lastSha = { ...args.disk.lastSha };
   let config = GithubSync_withExpiry(args.config, readExpiry(appliedRead));

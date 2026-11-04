@@ -1,4 +1,4 @@
-# Mario Lift GitHub sync
+# Strength and Honor GitHub sync
 
 The phone backs up IndexedDB to a private GitHub repo. A bot writes program-text changes into that repo. The phone applies them.
 

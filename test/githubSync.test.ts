@@ -94,7 +94,7 @@ describe("GitHub sync push", () => {
     expect(puts.every((call) => call.authorization === `Bearer ${TOKEN}`)).to.equal(true);
     const storagePut = decodePut(puts[0].body);
     expect(storagePut.sha).to.equal("known-sha");
-    expect(storagePut.message).to.equal("Mario Lift backup");
+    expect(storagePut.message).to.equal("Strength and Honor backup");
     const uploaded = JSON.parse(storagePut.decoded) as { history: { id: number }[]; stats: { weight: object } };
     expect(uploaded.history).to.eql([{ id: 7 }]);
     expect(uploaded.stats.weight).to.eql({});
